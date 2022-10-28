@@ -1,86 +1,85 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
-import './quiz.dart';
-import './result.dart';
+import './home_screen.dart';
+// import './widgets/quiz.dart';
+// import './widgets/result.dart';
 
-void main() => runApp(MyApp());
+void main() async => runApp(MyApp());
 
 class MyApp extends StatefulWidget {
   @override
   State<StatefulWidget> createState() {
     return _MyAppState();
   }
+
+  static _MyAppState of(BuildContext context) =>
+      context.findAncestorStateOfType<_MyAppState>()!;
 }
 
 class _MyAppState extends State<MyApp> {
-  final _questions = const [
-    {
-      'questionText': 'What\'s your favorite color?',
-      'answers': [
-        {'text': 'Black', 'score': 10},
-        {'text': 'Red', 'score': 5},
-        {'text': 'Green', 'score': 3},
-        {'text': 'White', 'score': 1},
-      ],
-    },
-    {
-      'questionText': 'What\'s your favorite animal?',
-      'answers': [
-        {'text': 'Rabbit', 'score': 3},
-        {'text': 'Snake', 'score': 11},
-        {'text': 'Elephant', 'score': 5},
-        {'text': 'Lion', 'score': 9},
-      ],
-    },
-    {
-      'questionText': 'Who\'s your favorite instructor?',
-      'answers': [
-        {'text': 'Max', 'score': 1},
-        {'text': 'Max', 'score': 1},
-        {'text': 'Max', 'score': 1},
-        {'text': 'Max', 'score': 1},
-      ],
-    },
-  ];
+  ThemeMode? themeMode;
 
-  var _questionIndex = 0;
-  var _totalScore = 0;
-
-  void _resetQuiz() {
+  Future<void> _setThemeFromSharedPref() async {
+    final prefs = await SharedPreferences.getInstance();
+    final darkTheme = prefs.getBool('darkTheme');
     setState(() {
-      _questionIndex = 0;
-      _totalScore = 0;
+      if (darkTheme == null) {
+        themeMode = ThemeMode.system;
+      } else if (darkTheme == true) {
+        themeMode = ThemeMode.dark;
+      } else {
+        themeMode = ThemeMode.light;
+      }
     });
   }
 
-  void _answerQuestion(int score) {
-    if (_questionIndex < _questions.length) {
-      print('We have more questions!');
-    }
-
-    _totalScore += score;
+  void changeTheme(ThemeMode? newThemeMode) async {
     setState(() {
-      _questionIndex = _questionIndex + 1;
+      themeMode = newThemeMode;
     });
-    print(_questionIndex);
-    print('Answer chosen');
+    final prefs = await SharedPreferences.getInstance();
+    if (newThemeMode == ThemeMode.system) {
+      await prefs.remove('darkTheme');
+    } else if (newThemeMode == ThemeMode.dark) {
+      await prefs.setBool('darkTheme', true);
+    } else {
+      await prefs.setBool('darkTheme', false);
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _setThemeFromSharedPref();
   }
 
   @override
   Widget build(BuildContext context) {
+    print(themeMode);
     return MaterialApp(
-      home: Scaffold(
-        appBar: AppBar(
-          title: Text('My First App'),
+      title: 'Quizzes and Tests',
+      theme: ThemeData(
+        brightness: Brightness.light,
+        // LIGHT
+        colorScheme: ColorScheme.light(
+          primary: Colors.purple,
+          secondary: Colors.amber,
         ),
-        body: _questionIndex < _questions.length
-            ? Quiz(
-                answerQuestion: _answerQuestion,
-                questionIndex: _questionIndex,
-                questions: _questions,
-              )
-            : Result(_totalScore, _resetQuiz),
+        fontFamily: 'Quicksand',
       ),
+      darkTheme: ThemeData(
+        brightness: Brightness.dark,
+        // DARK
+        colorScheme: ColorScheme.dark(
+          primary: Colors.purple,
+          secondary: Colors.amber,
+        ),
+        fontFamily: 'Quicksand',
+      ),
+      themeMode: themeMode,
+      debugShowCheckedModeBanner: false,
+      home: HomeScreen(),
     );
   }
 }
