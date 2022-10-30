@@ -1,8 +1,13 @@
+// ignore_for_file: prefer_const_constructors
+
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'firebase_options.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
-import './home_screen.dart';
-// import './widgets/quiz.dart';
+import './screens/home_screen.dart';
+import './models/quizModel.dart';
 // import './widgets/result.dart';
 
 void main() async => runApp(MyApp());
@@ -19,6 +24,12 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
   ThemeMode? themeMode;
+
+  void initFirebase() async {
+    await Firebase.initializeApp(
+      options: DefaultFirebaseOptions.currentPlatform,
+    );
+  }
 
   Future<void> _setThemeFromSharedPref() async {
     final prefs = await SharedPreferences.getInstance();
@@ -51,6 +62,7 @@ class _MyAppState extends State<MyApp> {
   @override
   void initState() {
     super.initState();
+    initFirebase();
     _setThemeFromSharedPref();
   }
 

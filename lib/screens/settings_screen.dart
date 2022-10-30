@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import './main.dart';
+import '../main.dart';
 
 class SettingsScreen extends StatefulWidget {
   @override
@@ -11,10 +11,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Row(
-        children: [
-          Spacer(flex: 1),
-          Column(
+      body: Center(
+        child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Spacer(flex: 1),
@@ -48,8 +46,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
               Spacer(flex: 1),
             ],
           ),
-          Spacer(flex: 1),
-        ],
       ),
     );
   }
