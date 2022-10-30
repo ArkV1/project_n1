@@ -3,9 +3,6 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-import '../models/quizModel.dart';
-import '../widgets/quizWidget.dart';
-
 // import './widgets/quiz_list.dart';
 
 class CatalogScreen extends StatefulWidget {

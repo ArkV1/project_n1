@@ -7,12 +7,13 @@ import 'firebase_options.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 import './screens/home_screen.dart';
-import './models/quizModel.dart';
 // import './widgets/result.dart';
 
 void main() async => runApp(MyApp());
 
 class MyApp extends StatefulWidget {
+  const MyApp({super.key});
+
   @override
   State<StatefulWidget> createState() {
     return _MyAppState();

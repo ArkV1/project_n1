@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 
-import '../models/quizModel.dart';
 import '../widgets/menu_button.dart';
 import './catalog_screen.dart';
 import './create_screen.dart';
 import './settings_screen.dart';
 
 class HomeScreen extends StatelessWidget {
+  const HomeScreen({super.key});
 
   //
   void pageNavigation(BuildContext ctx, screen) {

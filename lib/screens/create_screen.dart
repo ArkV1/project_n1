@@ -4,9 +4,12 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-import '../models/quizModel.dart';
+import '../models/answer.dart';
+import '../models/question.dart';
 
 class CreateScreen extends StatefulWidget {
+  const CreateScreen({super.key});
+
   @override
   State<CreateScreen> createState() => _CreateScreenState();
 }
@@ -16,31 +19,27 @@ class _CreateScreenState extends State<CreateScreen> {
   CollectionReference quizzes =
       FirebaseFirestore.instance.collection('quizzes');
   //
-  final titleController = TextEditingController();
   final descriptionController = TextEditingController();
+  final questionController = TextEditingController();
+  List<TextEditingController> answersControllerList = [TextEditingController()];
+  //
+  int activeQuestions = 1;
+  int activeAnswerFields = 1;
   //
   var typeQuiz = true;
-  String description = 'description';
-  Map<String, Object> questions = {
-    'questionText': 'Testing',
-    'answers': ['Test', 'Test', 'Test', 'Test'],
-  };
-  String creator = 'Anonymous';
-  DateTime date = DateTime.now();
   //
+  List<Question> questions = [];
+  //
+
   Future<void> addToQuizzes(typeQuiz) {
-    String typeQuizText;
-    if (typeQuiz) {
-      typeQuizText = 'Quiz';
-    } else {
-      typeQuizText = 'Test';
-    }
+    //
+    String testQuestion = 'testQuestion';
+    //
     return quizzes.add({
-      'typeQuizText': typeQuizText,
-      'description': description,
-      'questions': questions,
-      'creator': creator,
-      'date': date,
+      'typeQuiz': typeQuiz,
+      'questions': 'questions',
+      'creator': 'Anonymous',
+      'date': DateTime.now(),
     });
   }
 
@@ -63,6 +62,7 @@ class _CreateScreenState extends State<CreateScreen> {
                       // Spacer(flex: 1),
                       IntrinsicWidth(
                         child: Form(
+                          key: _formKey,
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
@@ -102,16 +102,6 @@ class _CreateScreenState extends State<CreateScreen> {
                                 ],
                               ),
                               TextFormField(
-                                decoration: InputDecoration(labelText: 'Title'),
-                                controller: titleController,
-                                validator: (value) {
-                                  if (value == null || value.isEmpty) {
-                                    return 'Please enter some text';
-                                  }
-                                  return null;
-                                },
-                              ),
-                              TextFormField(
                                 decoration:
                                     InputDecoration(labelText: 'Description'),
                                 controller: descriptionController,
@@ -149,9 +139,209 @@ class _CreateScreenState extends State<CreateScreen> {
                               Container(
                                 padding: EdgeInsets.all(10),
                                 child: ElevatedButton(
-                                    onPressed: () {},
-                                    child: Text('Add question')),
+                                  child: Text('Add questions'),
+                                  onPressed: () {
+                                    showDialog(
+                                      context: context,
+                                      builder: (BuildContext context) {
+                                        return Scaffold(
+                                          backgroundColor: Colors.transparent,
+                                          body: Builder(builder: (context) {
+                                            return AlertDialog(
+                                              scrollable: true,
+                                              title: Text('Add questions'),
+                                              content: StatefulBuilder(
+                                                builder: (
+                                                  BuildContext context,
+                                                  StateSetter setState,
+                                                ) {
+                                                  return Padding(
+                                                    padding:
+                                                        const EdgeInsets.all(
+                                                            8.0),
+                                                    child: Form(
+                                                      child: Column(
+                                                        children: <Widget>[
+                                                          Text(
+                                                              'Questions: $activeQuestions/8'),
+                                                          TextFormField(
+                                                            decoration:
+                                                                InputDecoration(
+                                                                    labelText:
+                                                                        'Question'),
+                                                            // controller:
+                                                            //     descriptionController,
+                                                            validator: (value) {
+                                                              if (value ==
+                                                                      null ||
+                                                                  value
+                                                                      .isEmpty) {
+                                                                return 'Please enter some text';
+                                                              }
+                                                              return null;
+                                                            },
+                                                          ),
+                                                          Column(
+                                                            children: [
+                                                              ElevatedButton(
+                                                                child: Text(
+                                                                    'Next question'),
+                                                                onPressed: () {
+                                                                  List<Answer> answers = [];
+                                                                  for (var i = 0; i < activeAnswerFields; i++) {
+                                                                    answers.add(Answer(answersControllerList[i].text, 0));
+                                                                  };
+                                                                  questions.add(Question(questionController.text,answers));
+                                                                },
+                                                              ),
+                                                              ElevatedButton(
+                                                                child: Text(
+                                                                    'Previous question'),
+                                                                onPressed:
+                                                                    () {},
+                                                              ),
+                                                            ],
+                                                          ),
+                                                          Text(
+                                                              'Answers: $activeAnswerFields/8'),
+                                                          for (var i = 0;
+                                                              i < activeAnswerFields &&
+                                                                  i < 8;
+                                                              i++)
+                                                            TextFormField(
+                                                              decoration:
+                                                                  InputDecoration(
+                                                                      labelText:
+                                                                          'Answer'),
+                                                              controller:
+                                                                  answersControllerList[0],
+                                                              validator:
+                                                                  (value) {
+                                                                if (value ==
+                                                                        null ||
+                                                                    value
+                                                                        .isEmpty) {
+                                                                  return 'Please enter some text';
+                                                                }
+                                                                return null;
+                                                              },
+                                                            ),
+                                                          Container(
+                                                            padding:
+                                                                EdgeInsets.all(
+                                                                    10),
+                                                            child: Column(
+                                                              children: [
+                                                                ElevatedButton(
+                                                                  child: Text(
+                                                                      'Add answer'),
+                                                                  onPressed:
+                                                                      () {
+                                                                    setState(
+                                                                      () {
+                                                                        if (activeAnswerFields !=
+                                                                            8) {
+                                                                          activeAnswerFields +=
+                                                                              1;
+                                                                          answersControllerList
+                                                                              .add(TextEditingController());
+                                                                        } else {
+                                                                          ScaffoldMessenger.of(context)
+                                                                              .showSnackBar(
+                                                                            const SnackBar(content: Text('You can\'t have more than 8 answers!')),
+                                                                          );
+                                                                        }
+                                                                      },
+                                                                    );
+                                                                  },
+                                                                ),
+                                                                ElevatedButton(
+                                                                  child: Text(
+                                                                      'Remove answer'),
+                                                                  onPressed:
+                                                                      () {
+                                                                    setState(
+                                                                      () {
+                                                                        if (activeAnswerFields !=
+                                                                            1) {
+                                                                          activeAnswerFields -=
+                                                                              1;
+                                                                          answersControllerList
+                                                                              .removeLast();
+                                                                        } else {
+                                                                          ScaffoldMessenger.of(context)
+                                                                              .showSnackBar(
+                                                                            const SnackBar(content: Text('You can\'t have less than 1 answer!')),
+                                                                          );
+                                                                        }
+                                                                      },
+                                                                    );
+                                                                  },
+                                                                ),
+                                                                ElevatedButton(
+                                                                  child: Text(
+                                                                      'Submit'),
+                                                                  style: ButtonStyle(
+                                                                      backgroundColor: MaterialStateProperty.all<
+                                                                          Color>(Theme.of(
+                                                                              context)
+                                                                          .colorScheme
+                                                                          .secondary)),
+                                                                  onPressed:
+                                                                      () {
+                                                                    print(
+                                                                        answersControllerList);
+                                                                    print(answersControllerList
+                                                                        .length);
+                                                                    if (_formKey
+                                                                        .currentState!
+                                                                        .validate()) {
+                                                                      // addToQuizzes(typeQuiz);
+                                                                      ScaffoldMessenger.of(
+                                                                              context)
+                                                                          .showSnackBar(
+                                                                        const SnackBar(
+                                                                            content:
+                                                                                Text('Processing Data')),
+                                                                      );
+                                                                    }
+                                                                  },
+                                                                ),
+                                                              ],
+                                                            ),
+                                                          ),
+                                                        ],
+                                                      ),
+                                                    ),
+                                                  );
+                                                },
+                                              ),
+                                            );
+                                          }),
+                                        );
+                                      },
+                                    );
+                                  },
+                                ),
                               ),
+                              ElevatedButton(
+                                child: Text('Submit'),
+                                style: ButtonStyle(
+                                    backgroundColor:
+                                        MaterialStateProperty.all<Color>(
+                                            Theme.of(context)
+                                                .colorScheme
+                                                .secondary)),
+                                onPressed: () {
+                                  if (_formKey.currentState!.validate()) {
+                                    // addToQuizzes(typeQuiz);
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      const SnackBar(
+                                          content: Text('Processing Data')),
+                                    );
+                                  }
+                                },
+                              )
                             ],
                           ),
                         ),
@@ -169,7 +359,15 @@ class _CreateScreenState extends State<CreateScreen> {
       floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
       floatingActionButton: FloatingActionButton(
         child: Icon(Icons.add),
-        onPressed: () {}, // () => addToQuizzes(typeQuiz),
+        onPressed: () {
+          if (_formKey.currentState!.validate()) {
+            print(descriptionController.text);
+            // addToQuizzes(typeQuiz);
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('Processing Data')),
+            );
+          }
+        },
       ),
     );
   }
