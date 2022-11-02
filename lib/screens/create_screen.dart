@@ -1,9 +1,13 @@
 // ignore_for_file: prefer_const_constructors, sort_child_properties_last
 
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
+import '../models/quiz.dart';
+import '../models/question.dart';
 import '../widgets/add_questions.dart';
 
 class CreateScreen extends StatefulWidget {
@@ -14,6 +18,13 @@ class CreateScreen extends StatefulWidget {
 }
 
 class _CreateScreenState extends State<CreateScreen> {
+  List<Question> questions = [];
+
+  void callback(questions) {
+    setState(() {
+      this.questions = questions;
+    });
+  }
 
   String? validatorIsEmpty(value) {
     if (value == null || value.isEmpty) {
@@ -23,25 +34,39 @@ class _CreateScreenState extends State<CreateScreen> {
   }
 
   CollectionReference quizzes =
-      FirebaseFirestore.instance.collection('quizzes');
+      FirebaseFirestore.instance.collection('quizzes').withConverter<Quiz>(
+            fromFirestore: (snapshots, _) => Quiz.fromJson(snapshots.data()!),
+            toFirestore: (quiz, _) => quiz.toJson(),
+          );
 
   final descriptionController = TextEditingController();
-  
+
   var typeQuiz = true;
-  
 
-  // Future<void> addToQuizzes(typeQuiz) {
-  //   //
-  //   String testQuestion = 'testQuestion';
-  //   //
-  //   return quizzes.add({
-  //     'typeQuiz': typeQuiz,
-  //     'questions': 'questions',
-  //     'creator': 'Anonymous',
-  //     'date': DateTime.now(),
-  //   });
-  // }
+  void printQuestions(List<Question> questions) {
+    print('Number of questions: ${questions.length}');
+    for (var i = 0; i < questions.length; i++) {
+      print('Question #${i + 1} is ${questions[i].questionText}');
+      for (var x = 0; x < questions[i].answers.length; x++) {
+        print('Answer #${x + 1} is ${questions[i].answers[x].answer}');
+      }
+    }
+  }
 
+  Future<void> addToQuizzes(typeQuiz) {
+    // god bless quicktype.io
+    print('TRYING TO ADD A DOCUMENT TO A FIRESTORE');
+    var quiz = Quiz(
+      typeQuiz: typeQuiz,
+      description: descriptionController.text,
+      creator: 'Anonymous',
+      date: DateTime.now(),
+      questions: questions,
+    );
+    print(quiz.toJson());
+
+    return quizzes.add(quiz);
+  }
 
   final _formKey = GlobalKey<FormState>();
 
@@ -102,11 +127,10 @@ class _CreateScreenState extends State<CreateScreen> {
                                 ],
                               ),
                               TextFormField(
-                                decoration:
-                                    InputDecoration(labelText: 'Description'),
-                                controller: descriptionController,
-                                validator: validatorIsEmpty
-                              ),
+                                  decoration:
+                                      InputDecoration(labelText: 'Description'),
+                                  controller: descriptionController,
+                                  validator: validatorIsEmpty),
                               TextField(
                                 decoration: InputDecoration(
                                   floatingLabelBehavior:
@@ -140,7 +164,8 @@ class _CreateScreenState extends State<CreateScreen> {
                                       showDialog(
                                         context: context,
                                         builder: (BuildContext context) {
-                                          return AddQuestions();
+                                          return AddQuestions(
+                                              this.questions, callback);
                                         },
                                       );
                                     }
@@ -157,7 +182,10 @@ class _CreateScreenState extends State<CreateScreen> {
                                                 .secondary)),
                                 onPressed: () {
                                   if (_formKey.currentState!.validate()) {
-                                    // addToQuizzes(typeQuiz);
+                                    print(
+                                        'Theme of the quiz is ${descriptionController.text}');
+                                    printQuestions(questions);
+                                    addToQuizzes(typeQuiz);
                                     ScaffoldMessenger.of(context).showSnackBar(
                                       const SnackBar(
                                           content: Text('Processing Data')),
@@ -184,8 +212,9 @@ class _CreateScreenState extends State<CreateScreen> {
         child: Icon(Icons.add),
         onPressed: () {
           if (_formKey.currentState!.validate()) {
-            print(descriptionController.text);
-            // addToQuizzes(typeQuiz);
+            print('Theme of the quiz is ${descriptionController.text}');
+            printQuestions(questions);
+            addToQuizzes(typeQuiz);
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(content: Text('Processing Data')),
             );

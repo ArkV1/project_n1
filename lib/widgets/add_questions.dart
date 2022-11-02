@@ -6,7 +6,9 @@ import '../models/question.dart';
 import '../models/answer.dart';
 
 class AddQuestions extends StatefulWidget {
-  const AddQuestions({super.key});
+  List<Question> questions;
+  Function(List<Question>) callback;
+  AddQuestions(this.questions, this.callback);
 
   @override
   State<AddQuestions> createState() => _AddQuestionsState();
@@ -87,8 +89,9 @@ class _AddQuestionsState extends State<AddQuestions> {
                               if (_subFormKey.currentState!.validate()) {
                                 List<Answer> answers = [];
                                 for (var i = 0; i < numberOfAnswers; i++) {
-                                  answers.add(
-                                      Answer(answersControllerList[i].text, 0));
+                                  answers.add(Answer(
+                                      answer: answersControllerList[i].text,
+                                      score: 0));
                                 }
                                 // if (questions
                                 //         .length ==
@@ -102,13 +105,11 @@ class _AddQuestionsState extends State<AddQuestions> {
                                 // } else
                                 if (questions.length - 1 < 8) {
                                   setState(() {
-                                    questions.add(
-                                      Question(
-                                          questionsControllerList[
-                                                  numberOfQuestions - 1]
-                                              .text,
-                                          answers),
-                                    );
+                                    questions.add(Question(
+                                        questionText: questionsControllerList[
+                                                numberOfQuestions - 1]
+                                            .text,
+                                        answers: answers));
                                     questionsControllerList
                                         .add(TextEditingController());
                                     //
@@ -228,8 +229,23 @@ class _AddQuestionsState extends State<AddQuestions> {
                                       Theme.of(context).colorScheme.secondary)),
                               onPressed: () {
                                 if (_subFormKey.currentState!.validate()) {
-                                  //
+                                  List<Answer> answers = [];
+                                  for (var i = 0; i < numberOfAnswers; i++) {
+                                    answers.add(Answer(
+                                        answer: answersControllerList[i].text,
+                                        score: 0));
+                                  }
+                                  questions.add(
+                                    Question(
+                                        questionText: questionsControllerList[
+                                                numberOfQuestions - 1]
+                                            .text,
+                                        answers: answers),
+                                  );
+                                  printQuestions(questions);
                                   Navigator.pop(context);
+                                  widget.callback(questions);
+                                  //
                                   //
                                   snackBar('Processing Data');
                                 }
