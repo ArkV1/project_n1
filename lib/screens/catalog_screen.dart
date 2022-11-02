@@ -48,7 +48,7 @@ class _CatalogScreenState extends State<CatalogScreen> {
                             ),
                           ),
                           Text(
-                            (data[i]['author']),
+                            (data[i]['creator']),
                             // Text(
                             //   (DateFormat.yMMMd().format()),
                             // ),
