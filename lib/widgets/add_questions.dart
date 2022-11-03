@@ -141,19 +141,19 @@ class _AddQuestionsState extends State<AddQuestions> {
                                     for (var i = 0;
                                         i <
                                             questions[numberOfQuestions - 2]
-                                                .answers
+                                                .answers!
                                                 .length;
                                         i++) {
                                       answersControllerList
                                           .add(TextEditingController());
                                       answersControllerList[i].text =
                                           questions[questions.length - 1]
-                                              .answers[i]
-                                              .answer;
+                                              .answers![i]
+                                              .answer!;
                                     }
                                     numberOfAnswers =
                                         questions[numberOfQuestions - 2]
-                                            .answers
+                                            .answers!
                                             .length;
                                     questions.removeLast();
                                     questionsControllerList.removeLast();

@@ -1,19 +1,35 @@
 class Answer {
+  String? answer;
+  int? score;
+
   Answer({
-    required this.answer,
-    required this.score,
+    this.answer,
+    this.score,
   });
 
-  String answer;
-  int score;
+  factory Answer.fromFirestore(
+    Map<String, dynamic> data,
+  ) {
+    return Answer(
+      answer: data?['answer'],
+      score: data?['score'],
+    );
+  }
 
-  factory Answer.fromJson(Map<String, dynamic> json) => Answer(
-        answer: json["answer"],
-        score: json["score"],
-      );
+  Map<String, dynamic> toFirestore() {
+    return {
+      if (answer != null) "answer": answer,
+      if (score != null) "score": score,
+    };
+  }
 
-  Map<String, dynamic> toJson() => {
-        "answer": answer,
-        "score": score,
-      };
+  // factory Answer.fromJson(Map<String, dynamic> json) => Answer(
+  //       answer: json["answer"],
+  //       score: json["score"],
+  //     );
+
+  // Map<String, dynamic> toJson() => {
+  //       "answer": answer,
+  //       "score": score,
+  //     };
 }

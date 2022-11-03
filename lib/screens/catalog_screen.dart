@@ -7,29 +7,60 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 
 import '../models/quiz.dart';
 
+CollectionReference quizzesRef = FirebaseFirestore.instance
+    .collection('quizzes')
+    .withConverter<Quiz>(
+      fromFirestore: (snapshots, _) => Quiz.fromFirestore(snapshots.data()!),
+      toFirestore: (quiz, _) => quiz.toFirestore(),
+    );
+
+Future<void> getQuizzes() async {
+  // final ref = FirebaseFirestore.instance.collection("quizzes").doc("Sq5kabHbNyGlyNX5Y4Eg").withConverter(
+  //       fromFirestore: (snapshots, _) => Quiz.fromFirestore(snapshots.data()!),
+  //       toFirestore: (quiz, _) => quiz.toFirestore(),
+  //     );
+
+  // final docSnap = await ref.get().whenComplete(() => print('mfka'));
+  // print(docSnap.data());
+  // final q1 = docSnap.data();
+  // print(q1);
+  // final docSnap = await quizzesRef.doc('Sq5kabHbNyGlyNX5Y4Eg').get().whenComplete(() => print('GAMER'));
+  // print('BEFORE');
+  // print(docSnap.data());
+  // Quiz q1 = docSnap.data();
+  // print('AFTER');
+  // print(q1);
+  // final docSnap = await quizzesRef.get();
+  // print(docSnap);
+  // final quiz1 = docSnap.data();
+  // print(quiz1);
+  // var qrg = await quizzesRef.get();
+  // qrg.docs.forEach((doc) {
+  //   print(doc.data());
+  // });
+  // var qrdg = await quizzesRef.doc('4P8LyK2HlyFkhhW3YwWI').withConverter<Quiz>(
+  //         fromFirestore: (snapshot, _) => Quiz.fromJson(snapshot.data()!),
+  //         toFirestore: (quiz, _) => quiz.toJson(),
+  //       ).get().whenComplete(() => print('GUCCI'));
+  // print(qrdg.get('field'));
+}
+
 class CatalogScreen extends StatefulWidget {
   @override
   State<CatalogScreen> createState() => _CatalogScreenState();
 }
 
 class _CatalogScreenState extends State<CatalogScreen> {
+  List<Quiz> quizzes = [];
+
   @override
   Widget build(BuildContext context) {
-    CollectionReference quizzesRef =
-        FirebaseFirestore.instance.collection('quizzes').withConverter<Quiz>(
-              fromFirestore: (snapshots, _) => Quiz.fromJson(snapshots.data()!),
-              toFirestore: (quiz, _) => quiz.toJson(),
-            );
-    
-    //List<Quiz> quizzes = [];
-    
     return Scaffold(
       body: SafeArea(
-        //child: Text('hehe'),
+        //child: Text('game'),
         child: FutureBuilder(
-          future: quizzesRef.get(),
-          builder:
-              (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
+          future: getQuizzes(),
+          builder: (BuildContext context, snapshot) {
             if (snapshot.hasError) {
               return Center(child: Text("Something went wrong"));
             }
@@ -38,12 +69,7 @@ class _CatalogScreenState extends State<CatalogScreen> {
             //   return Text("Document does not exist");
             // }
 
-            if (snapshot.hasData && snapshot.data!.docs != null && snapshot.connectionState == ConnectionState.done) {
-              List<Quiz> quizzes = [];
-              snapshot.data!.docs.forEach((doc) {
-                quizzes.add(doc.data() as Quiz);
-              });
-              //snapshot.data!.docs.toList().get().then((snapshot) => snapshot.data()!);
+            if (snapshot.connectionState == ConnectionState.done) {
               return GridView.count(
                 crossAxisCount: 2,
                 children: [
@@ -51,7 +77,7 @@ class _CatalogScreenState extends State<CatalogScreen> {
                     Card(
                       child: Column(
                         children: [
-                          Text(quizzes[i].description),
+                          Text(quizzes[i].description!),
                           SizedBox(
                             height: 115,
                             width: 115,
@@ -60,7 +86,7 @@ class _CatalogScreenState extends State<CatalogScreen> {
                             ),
                           ),
                           Text(
-                            (quizzes[i].creator),
+                            (quizzes[i].creator!),
                           ),
                           // Text(
                           //   (DateTimeFormatdata[i]['date']),

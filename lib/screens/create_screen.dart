@@ -35,8 +35,8 @@ class _CreateScreenState extends State<CreateScreen> {
 
   CollectionReference quizzes =
       FirebaseFirestore.instance.collection('quizzes').withConverter<Quiz>(
-            fromFirestore: (snapshots, _) => Quiz.fromJson(snapshots.data()!),
-            toFirestore: (quiz, _) => quiz.toJson(),
+            fromFirestore: (snapshots, _) => Quiz.fromFirestore(snapshots.data()!),
+            toFirestore: (quiz, _) => quiz.toFirestore(),
           );
 
   final descriptionController = TextEditingController();
@@ -47,8 +47,8 @@ class _CreateScreenState extends State<CreateScreen> {
     print('Number of questions: ${questions.length}');
     for (var i = 0; i < questions.length; i++) {
       print('Question #${i + 1} is ${questions[i].questionText}');
-      for (var x = 0; x < questions[i].answers.length; x++) {
-        print('Answer #${x + 1} is ${questions[i].answers[x].answer}');
+      for (var x = 0; x < questions[i].answers!.length; x++) {
+        print('Answer #${x + 1} is ${questions[i].answers![x].answer}');
       }
     }
   }
@@ -63,7 +63,7 @@ class _CreateScreenState extends State<CreateScreen> {
       date: DateTime.now(),
       questions: questions,
     );
-    print(quiz.toJson());
+    print(quiz.toFirestore());
 
     return quizzes.add(quiz);
   }
