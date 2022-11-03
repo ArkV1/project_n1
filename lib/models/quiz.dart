@@ -19,7 +19,7 @@ class Quiz {
         typeQuiz: json['typeQuiz'],
         description: json['description'],
         creator: json['creator'],
-        date: json['date'],
+        date: json['date'].toDate(),
         questions: List<Question>.from(
             json['Question'].map((x) => Question.fromJson(x))),
       );

@@ -1,5 +1,3 @@
-import 'dart:ffi';
-
 class Answer {
   Answer({
     required this.answer,
