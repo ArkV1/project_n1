@@ -33,11 +33,12 @@ class _CreateScreenState extends State<CreateScreen> {
     return null;
   }
 
-  CollectionReference quizzes =
-      FirebaseFirestore.instance.collection('quizzes').withConverter<Quiz>(
-            fromFirestore: (snapshots, _) => Quiz.fromFirestore(snapshots.data()!),
-            toFirestore: (quiz, _) => quiz.toFirestore(),
-          );
+  CollectionReference quizzes = FirebaseFirestore.instance
+      .collection('quizzes')
+      .withConverter<Quiz>(
+        fromFirestore: (snapshots, _) => Quiz.fromFirestore(snapshots.data()!),
+        toFirestore: (quiz, _) => quiz.toFirestore(),
+      );
 
   final descriptionController = TextEditingController();
 
@@ -74,134 +75,140 @@ class _CreateScreenState extends State<CreateScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: SafeArea(
-        child: Center(
-          child: ListView(
-            shrinkWrap: true,
+        child: LayoutBuilder(
+          builder: (context, constraints) => ListView(
+            // shrinkWrap: true,
             scrollDirection: Axis.vertical,
             children: [
-              Row(
-                children: [
-                  Spacer(flex: 1),
-                  Column(
-                    children: [
-                      // Spacer(flex: 1),
-                      IntrinsicWidth(
-                        child: Form(
-                          key: _formKey,
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              if (typeQuiz == true) ...[
-                                Text('Type: Quiz'),
-                              ] else ...[
-                                Text('Type: Test'),
-                              ],
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  //
-                                  Container(
-                                    padding: EdgeInsets.all(5),
-                                    child: ElevatedButton(
-                                      onPressed: () {
-                                        setState(() {
-                                          typeQuiz = true;
-                                        });
-                                      },
-                                      child: Text('Quiz'),
-                                    ),
-                                  ),
-                                  //
-                                  Container(
-                                    padding: EdgeInsets.all(5),
-                                    child: ElevatedButton(
-                                      onPressed: () {
-                                        setState(() {
-                                          typeQuiz = false;
-                                        });
-                                      },
-                                      child: Text('Test'),
-                                    ),
-                                  ),
-                                  //
+              Container(
+                constraints: BoxConstraints(
+                  minHeight: constraints.maxHeight,
+                ),
+                child: Row(
+                  children: [
+                    Spacer(flex: 1),
+                    Column(
+                      children: [
+                        // Spacer(flex: 1),
+                        IntrinsicWidth(
+                          child: Form(
+                            key: _formKey,
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                if (typeQuiz == true) ...[
+                                  Text('Type: Quiz'),
+                                ] else ...[
+                                  Text('Type: Test'),
                                 ],
-                              ),
-                              TextFormField(
-                                  decoration:
-                                      InputDecoration(labelText: 'Description'),
-                                  controller: descriptionController,
-                                  validator: validatorIsEmpty),
-                              TextField(
-                                decoration: InputDecoration(
-                                  floatingLabelBehavior:
-                                      FloatingLabelBehavior.always,
-                                  labelText: 'Author',
-                                  hintText: 'Anonymous - Not logged in',
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    //
+                                    Container(
+                                      padding: EdgeInsets.all(5),
+                                      child: ElevatedButton(
+                                        onPressed: () {
+                                          setState(() {
+                                            typeQuiz = true;
+                                          });
+                                        },
+                                        child: Text('Quiz'),
+                                      ),
+                                    ),
+                                    //
+                                    Container(
+                                      padding: EdgeInsets.all(5),
+                                      child: ElevatedButton(
+                                        onPressed: () {
+                                          setState(() {
+                                            typeQuiz = false;
+                                          });
+                                        },
+                                        child: Text('Test'),
+                                      ),
+                                    ),
+                                    //
+                                  ],
                                 ),
-                                enabled: false,
-                                controller: null,
-                                onSubmitted: null,
-                              ),
-                              TextField(
-                                decoration: InputDecoration(
-                                  floatingLabelBehavior:
-                                      FloatingLabelBehavior.always,
-                                  labelText: 'Date',
-                                  hintText: (DateFormat.yMMMd()
-                                      .format(DateTime.now())
-                                      .toString()),
+                                TextFormField(
+                                    decoration: InputDecoration(
+                                        labelText: 'Description'),
+                                    controller: descriptionController,
+                                    validator: validatorIsEmpty),
+                                TextField(
+                                  decoration: InputDecoration(
+                                    floatingLabelBehavior:
+                                        FloatingLabelBehavior.always,
+                                    labelText: 'Author',
+                                    hintText: 'Anonymous - Not logged in',
+                                  ),
+                                  enabled: false,
+                                  controller: null,
+                                  onSubmitted: null,
                                 ),
-                                enabled: false,
-                                controller: null,
-                                onSubmitted: null,
-                              ),
-                              Container(
-                                padding: EdgeInsets.all(10),
-                                child: ElevatedButton(
-                                  child: Text('Add questions'),
+                                TextField(
+                                  decoration: InputDecoration(
+                                    floatingLabelBehavior:
+                                        FloatingLabelBehavior.always,
+                                    labelText: 'Date',
+                                    hintText: (DateFormat.yMMMd()
+                                        .format(DateTime.now())
+                                        .toString()),
+                                  ),
+                                  enabled: false,
+                                  controller: null,
+                                  onSubmitted: null,
+                                ),
+                                Container(
+                                  padding: EdgeInsets.all(10),
+                                  child: ElevatedButton(
+                                    child: Text('Add questions'),
+                                    onPressed: () {
+                                      if (_formKey.currentState!.validate()) {
+                                        showDialog(
+                                          context: context,
+                                          builder: (BuildContext context) {
+                                            return AddQuestions(
+                                                this.questions, callback);
+                                          },
+                                        );
+                                      }
+                                    },
+                                  ),
+                                ),
+                                ElevatedButton(
+                                  child: Text('Submit'),
+                                  style: ButtonStyle(
+                                      backgroundColor:
+                                          MaterialStateProperty.all<Color>(
+                                              Theme.of(context)
+                                                  .colorScheme
+                                                  .secondary)),
                                   onPressed: () {
                                     if (_formKey.currentState!.validate()) {
-                                      showDialog(
-                                        context: context,
-                                        builder: (BuildContext context) {
-                                          return AddQuestions(
-                                              this.questions, callback);
-                                        },
+                                      print(
+                                          'Theme of the quiz is ${descriptionController.text}');
+                                      printQuestions(questions);
+                                      addToQuizzes(typeQuiz);
+                                      ScaffoldMessenger.of(context)
+                                          .showSnackBar(
+                                        const SnackBar(
+                                            content: Text('Processing Data')),
                                       );
                                     }
                                   },
-                                ),
-                              ),
-                              ElevatedButton(
-                                child: Text('Submit'),
-                                style: ButtonStyle(
-                                    backgroundColor:
-                                        MaterialStateProperty.all<Color>(
-                                            Theme.of(context)
-                                                .colorScheme
-                                                .secondary)),
-                                onPressed: () {
-                                  if (_formKey.currentState!.validate()) {
-                                    print(
-                                        'Theme of the quiz is ${descriptionController.text}');
-                                    printQuestions(questions);
-                                    addToQuizzes(typeQuiz);
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      const SnackBar(
-                                          content: Text('Processing Data')),
-                                    );
-                                  }
-                                },
-                              )
-                            ],
+                                )
+                              ],
+                            ),
                           ),
                         ),
-                      ),
-                      // Spacer(flex: 1),
-                    ],
-                  ),
-                  Spacer(flex: 1),
-                ],
+                        // Spacer(flex: 1),
+                      ],
+                    ),
+                    Spacer(flex: 1),
+                  ],
+                ),
               )
             ],
           ),

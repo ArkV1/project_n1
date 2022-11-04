@@ -24,7 +24,7 @@ class Quiz {
       typeQuiz: data?['typeQuiz'],
       description: data?['description'],
       creator: data?['creator'],
-      date: data?['date'],
+      date: data?['date'].toDate(),
       questions:
           List<Question>.from(data?['questions'].map((x) => Question.fromFirestore(x))),
     );
