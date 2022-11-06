@@ -156,7 +156,8 @@ class _AddResultsState extends State<AddResults> {
                                 for (var i = 0; i < numberOfResults; i++) {
                                   results.add(Result(
                                       result: resultsControllerList[i].text,
-                                      score: 0));
+                                      score: int.parse(
+                                          resultsScoreControllerList[i].text)));
                                 }
                                 printResults(results);
                                 Navigator.pop(context);

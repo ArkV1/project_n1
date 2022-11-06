@@ -272,7 +272,8 @@ class _AddQuestionsState extends State<AddQuestions> {
                                 for (var i = 0; i < numberOfAnswers; i++) {
                                   answers.add(Answer(
                                       answer: answersControllerList[i].text,
-                                      score: 0));
+                                      score: int.parse(
+                                          answersScoreControllerList[i].text)));
                                 }
                                 questions.add(
                                   Question(
