@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../widgets/menu_button.dart';
+import '../buttons/menu_button.dart';
 import './catalog_screen.dart';
 import './create_screen.dart';
 import './settings_screen.dart';

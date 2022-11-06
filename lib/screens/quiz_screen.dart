@@ -16,15 +16,23 @@ class QuizScreen extends StatelessWidget {
           children: [
             for (var i = 0; i < quiz.questions!.length; i++)
               Column(
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Text(quiz.questions![i].questionText!),
-                  for (var x = 0; x < quiz.questions![i].answers!.length; x++)
-                    Container(
-                      child: ElevatedButton(
-                        onPressed: () {},
-                        child: Text(quiz.questions![i].answers![x].answer!),
-                      ),
+                  IntrinsicWidth(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        for (var x = 0;
+                            x < quiz.questions![i].answers!.length;
+                            x++)
+                          ElevatedButton(
+                            onPressed: () {},
+                            child: Text(quiz.questions![i].answers![x].answer!),
+                          ),
+                      ],
                     ),
+                  )
                 ],
               ),
           ],

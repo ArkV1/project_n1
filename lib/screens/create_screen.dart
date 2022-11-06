@@ -8,7 +8,9 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 
 import '../models/quiz.dart';
 import '../models/question.dart';
-import '../widgets/add_questions.dart';
+import '../models/result.dart';
+import '../buttons/add_questions.dart';
+import '../buttons/add_results.dart';
 
 class CreateScreen extends StatefulWidget {
   const CreateScreen({super.key});
@@ -19,10 +21,17 @@ class CreateScreen extends StatefulWidget {
 
 class _CreateScreenState extends State<CreateScreen> {
   List<Question> questions = [];
+  List<Result> results = [];
 
-  void callback(questions) {
+  void callbackQuestions(questions) {
     setState(() {
       this.questions = questions;
+    });
+  }
+
+  void callbackResults(results) {
+    setState(() {
+      this.results = results;
     });
   }
 
@@ -63,6 +72,7 @@ class _CreateScreenState extends State<CreateScreen> {
       creator: 'Anonymous',
       date: DateTime.now(),
       questions: questions,
+      results: results,
     );
     print(quiz.toFirestore());
 
@@ -160,21 +170,49 @@ class _CreateScreenState extends State<CreateScreen> {
                                   controller: null,
                                   onSubmitted: null,
                                 ),
-                                Container(
-                                  padding: EdgeInsets.all(10),
-                                  child: ElevatedButton(
-                                    child: Text('Add questions'),
-                                    onPressed: () {
-                                      if (_formKey.currentState!.validate()) {
-                                        showDialog(
-                                          context: context,
-                                          builder: (BuildContext context) {
-                                            return AddQuestions(
-                                                this.questions, callback);
+                                IntrinsicWidth(
+                                  child: Container(
+                                    padding: EdgeInsets.all(10),
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.stretch,
+                                      children: [
+                                        ElevatedButton(
+                                          child: Text('Add questions'),
+                                          onPressed: () {
+                                            if (_formKey.currentState!
+                                                .validate()) {
+                                              showDialog(
+                                                context: context,
+                                                builder:
+                                                    (BuildContext context) {
+                                                  return AddQuestions(
+                                                      this.questions,
+                                                      callbackQuestions);
+                                                },
+                                              );
+                                            }
                                           },
-                                        );
-                                      }
-                                    },
+                                        ),
+                                        ElevatedButton(
+                                          child: Text('Add results'),
+                                          onPressed: () {
+                                            if (_formKey.currentState!
+                                                .validate()) {
+                                              showDialog(
+                                                context: context,
+                                                builder:
+                                                    (BuildContext context) {
+                                                  return AddResults(
+                                                      this.results,
+                                                      callbackResults);
+                                                },
+                                              );
+                                            }
+                                          },
+                                        ),
+                                      ],
+                                    ),
                                   ),
                                 ),
                                 ElevatedButton(

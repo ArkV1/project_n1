@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 import './question.dart';
+import './result.dart';
 
 class Quiz {
   final bool? typeQuiz;
@@ -8,6 +9,7 @@ class Quiz {
   final String? creator;
   final DateTime? date;
   final List<Question>? questions;
+  final List<Result>? results;
 
   Quiz({
     this.typeQuiz,
@@ -15,6 +17,7 @@ class Quiz {
     this.creator,
     this.date,
     this.questions,
+    this.results,
   });
 
   factory Quiz.fromFirestore(
@@ -25,8 +28,10 @@ class Quiz {
       description: data?['description'],
       creator: data?['creator'],
       date: data?['date'].toDate(),
-      questions:
-          List<Question>.from(data?['questions'].map((x) => Question.fromFirestore(x))),
+      questions: List<Question>.from(
+          data?['questions'].map((x) => Question.fromFirestore(x))),
+      results: List<Result>.from(
+          data?['results'].map((x) => Result.fromFirestore(x))),
     );
   }
 
@@ -36,7 +41,10 @@ class Quiz {
       if (description != null) "description": description,
       if (creator != null) "creator": creator,
       if (date != null) "date": date,
-      if (questions != null) "questions": List<dynamic>.from(questions!.map((x) => x.toFirestore())),
+      if (questions != null)
+        "questions": List<dynamic>.from(questions!.map((x) => x.toFirestore())),
+      if (results != null)
+        "results": List<dynamic>.from(results!.map((x) => x.toFirestore())),
     };
   }
 }
