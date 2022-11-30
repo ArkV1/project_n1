@@ -2,7 +2,7 @@
 
 import 'package:flutter/material.dart';
 
-import '../models/result.dart';
+import '../../models/result.dart';
 
 class AddResults extends StatefulWidget {
   List<Result> results;
@@ -159,6 +159,7 @@ class _AddResultsState extends State<AddResults> {
                                       score: int.parse(
                                           resultsScoreControllerList[i].text)));
                                 }
+                                results.sort((a, b) => a.score!.compareTo(b.score!));
                                 printResults(results);
                                 Navigator.pop(context);
                                 widget.callback(results);

@@ -1,19 +1,21 @@
 // ignore_for_file: prefer_const_constructors, sort_child_properties_last
 
-import 'dart:convert';
+import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 
 import '../models/quiz.dart';
 import '../models/question.dart';
 import '../models/result.dart';
-import '../buttons/add_questions.dart';
-import '../buttons/add_results.dart';
+import '../widgets/pickers/create_screen_image_picker.dart';
+import '../widgets/buttons/add_questions.dart';
+import '../widgets/buttons/add_results.dart';
 
 class CreateScreen extends StatefulWidget {
-  const CreateScreen({super.key});
+  CreateScreen({super.key});
 
   @override
   State<CreateScreen> createState() => _CreateScreenState();
@@ -22,6 +24,7 @@ class CreateScreen extends StatefulWidget {
 class _CreateScreenState extends State<CreateScreen> {
   List<Question> questions = [];
   List<Result> results = [];
+  File? _quizPreviewImage;
 
   void callbackQuestions(questions) {
     setState(() {
@@ -48,10 +51,15 @@ class _CreateScreenState extends State<CreateScreen> {
         fromFirestore: (snapshots, _) => Quiz.fromFirestore(snapshots.data()!),
         toFirestore: (quiz, _) => quiz.toFirestore(),
       );
+  Reference storage = FirebaseStorage.instance.ref();
 
   final descriptionController = TextEditingController();
 
   var typeQuiz = true;
+
+  void _pickedImage(File image) {
+    _quizPreviewImage = image;
+  }
 
   void printQuestions(List<Question> questions) {
     print('Number of questions: ${questions.length}');
@@ -76,10 +84,40 @@ class _CreateScreenState extends State<CreateScreen> {
     );
     print(quiz.toFirestore());
 
-    return quizzes.add(quiz);
+    return quizzes.add(quiz).then((value) {
+      print(value.id);
+      if (_quizPreviewImage != null) {
+        storage
+            .child('quiz_images')
+            .child(value.id + '.jpg')
+            .putFile(_quizPreviewImage!);
+      }
+    });
   }
 
   final _formKey = GlobalKey<FormState>();
+
+  void _trySubmit() {
+    final isValid = _formKey.currentState!.validate();
+    FocusScope.of(context).unfocus();
+
+    // if (_quizPreviewImage == null) {
+    //   ScaffoldMessenger.of(context).showSnackBar(
+    //     SnackBar(
+    //       content: Text('Please pick an image'),
+    //     ),
+    //   );
+    // }
+
+    if (_formKey.currentState!.validate()) {
+      print('Theme of the quiz is ${descriptionController.text}');
+      printQuestions(questions);
+      addToQuizzes(typeQuiz);
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Processing Data')),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -106,41 +144,7 @@ class _CreateScreenState extends State<CreateScreen> {
                             child: Column(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                if (typeQuiz == true) ...[
-                                  Text('Type: Quiz'),
-                                ] else ...[
-                                  Text('Type: Test'),
-                                ],
-                                Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    //
-                                    Container(
-                                      padding: EdgeInsets.all(5),
-                                      child: ElevatedButton(
-                                        onPressed: () {
-                                          setState(() {
-                                            typeQuiz = true;
-                                          });
-                                        },
-                                        child: Text('Quiz'),
-                                      ),
-                                    ),
-                                    //
-                                    Container(
-                                      padding: EdgeInsets.all(5),
-                                      child: ElevatedButton(
-                                        onPressed: () {
-                                          setState(() {
-                                            typeQuiz = false;
-                                          });
-                                        },
-                                        child: Text('Test'),
-                                      ),
-                                    ),
-                                    //
-                                  ],
-                                ),
+                                CreateScreenImagePicker(_pickedImage),
                                 TextFormField(
                                     decoration: InputDecoration(
                                         labelText: 'Description'),
@@ -169,6 +173,44 @@ class _CreateScreenState extends State<CreateScreen> {
                                   enabled: false,
                                   controller: null,
                                   onSubmitted: null,
+                                ),
+                                if (typeQuiz == true) ...[
+                                  Text('Type: Quiz'),
+                                ] else ...[
+                                  Text('Type: Test'),
+                                ],
+                                Padding(
+                                  padding: const EdgeInsets.only(top: 8.0),
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      //
+                                      Container(
+                                        padding: EdgeInsets.all(5),
+                                        child: ElevatedButton(
+                                          onPressed: () {
+                                            setState(() {
+                                              typeQuiz = true;
+                                            });
+                                          },
+                                          child: Text('Quiz'),
+                                        ),
+                                      ),
+                                      //
+                                      Container(
+                                        padding: EdgeInsets.all(5),
+                                        child: ElevatedButton(
+                                          onPressed: () {
+                                            setState(() {
+                                              typeQuiz = false;
+                                            });
+                                          },
+                                          child: Text('Test'),
+                                        ),
+                                      ),
+                                      //
+                                    ],
+                                  ),
                                 ),
                                 IntrinsicWidth(
                                   child: Container(
@@ -223,19 +265,7 @@ class _CreateScreenState extends State<CreateScreen> {
                                               Theme.of(context)
                                                   .colorScheme
                                                   .secondary)),
-                                  onPressed: () {
-                                    if (_formKey.currentState!.validate()) {
-                                      print(
-                                          'Theme of the quiz is ${descriptionController.text}');
-                                      printQuestions(questions);
-                                      addToQuizzes(typeQuiz);
-                                      ScaffoldMessenger.of(context)
-                                          .showSnackBar(
-                                        const SnackBar(
-                                            content: Text('Processing Data')),
-                                      );
-                                    }
-                                  },
+                                  onPressed: _trySubmit,
                                 )
                               ],
                             ),
@@ -255,16 +285,7 @@ class _CreateScreenState extends State<CreateScreen> {
       floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
       floatingActionButton: FloatingActionButton(
         child: Icon(Icons.add),
-        onPressed: () {
-          if (_formKey.currentState!.validate()) {
-            print('Theme of the quiz is ${descriptionController.text}');
-            printQuestions(questions);
-            addToQuizzes(typeQuiz);
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Processing Data')),
-            );
-          }
-        },
+        onPressed: _trySubmit,
       ),
     );
   }

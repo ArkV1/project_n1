@@ -2,8 +2,8 @@
 
 import 'package:flutter/material.dart';
 
-import '../models/question.dart';
-import '../models/answer.dart';
+import '../../models/question.dart';
+import '../../models/answer.dart';
 
 class AddQuestions extends StatefulWidget {
   List<Question> questions;

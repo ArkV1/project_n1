@@ -1,15 +1,34 @@
 // ignore_for_file: prefer_const_constructors
 
+import 'dart:io';
+
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
+
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 
 import './screens/home_screen.dart';
 // import './widgets/result.dart';
 
-void main() async => runApp(MyApp());
+//  void initFirebase() async {
+//     await Firebase.initializeApp(
+//       options: DefaultFirebaseOptions.currentPlatform,
+//     );
+//     await loadBundle();
+//     print('Firebase Initialized');
+//   }
+
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  ).whenComplete(() => print('Firebase Initialized'));
+  runApp(MyApp());
+}
 
 class MyApp extends StatefulWidget {
   const MyApp({super.key});
@@ -26,10 +45,13 @@ class MyApp extends StatefulWidget {
 class _MyAppState extends State<MyApp> {
   ThemeMode? themeMode;
 
-  void initFirebase() async {
-    await Firebase.initializeApp(
-      options: DefaultFirebaseOptions.currentPlatform,
-    );
+  Future<void> loadBundle() async {
+    print('Loading Data Bundle');
+    ByteData bytes = await rootBundle.load("assets/dataBundle.txt");
+    Uint8List buffer =
+        bytes.buffer.asUint8List(bytes.offsetInBytes, bytes.lengthInBytes);
+    FirebaseFirestore.instance.loadBundle(buffer).stream.last;
+    print('Data Bundle loaded');
   }
 
   Future<void> _setThemeFromSharedPref() async {
@@ -63,36 +85,50 @@ class _MyAppState extends State<MyApp> {
   @override
   void initState() {
     super.initState();
-    initFirebase();
     _setThemeFromSharedPref();
+    loadBundle();
   }
 
   @override
   Widget build(BuildContext context) {
     print(themeMode);
-    return MaterialApp(
-      title: 'Quizzes and Tests',
-      theme: ThemeData(
-        brightness: Brightness.light,
-        // LIGHT
-        colorScheme: ColorScheme.light(
-          primary: Colors.purple,
-          secondary: Colors.amber,
-        ),
-        fontFamily: 'Quicksand',
-      ),
-      darkTheme: ThemeData(
-        brightness: Brightness.dark,
-        // DARK
-        colorScheme: ColorScheme.dark(
-          primary: Colors.purple,
-          secondary: Colors.amber,
-        ),
-        fontFamily: 'Quicksand',
-      ),
-      themeMode: themeMode,
-      debugShowCheckedModeBanner: false,
-      home: HomeScreen(),
-    );
+    return Platform.isIOS
+        ?
+        // IOS
+        CupertinoApp(
+            title: 'Quizzin',
+            theme: CupertinoThemeData(
+              brightness: Brightness.light,
+              primaryColor: Colors.purple,
+              primaryContrastingColor: Colors.amber,
+            ),
+            home: HomeScreen(),
+          )
+        :
+        // ANDROID
+        MaterialApp(
+            title: 'Quizzin',
+            theme: ThemeData(
+              brightness: Brightness.light,
+              // LIGHT
+              colorScheme: ColorScheme.light(
+                primary: Colors.purple,
+                secondary: Colors.amber,
+              ),
+              fontFamily: 'Quicksand',
+            ),
+            darkTheme: ThemeData(
+              brightness: Brightness.dark,
+              // DARK
+              colorScheme: ColorScheme.dark(
+                primary: Colors.purple,
+                secondary: Colors.amber,
+              ),
+              fontFamily: 'Quicksand',
+            ),
+            themeMode: themeMode,
+            debugShowCheckedModeBanner: false,
+            home: HomeScreen(),
+          );
   }
 }

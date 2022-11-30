@@ -15,38 +15,53 @@ class CatalogScreen extends StatefulWidget {
 }
 
 class _CatalogScreenState extends State<CatalogScreen> {
+  late Future futureQuizzes;
   List<Quiz> quizzes = [];
+
+  Future futureQuizzesFn() async {
+    return quizzesRef
+            .withConverter<Quiz>(
+              fromFirestore: (snapshots, _) =>
+                  Quiz.fromFirestore(snapshots.data()!),
+              toFirestore: (quiz, _) => quiz.toFirestore(),
+            )
+            .get(const GetOptions(source: Source.cache));
+  }
+
+  @override
+  void initState() {
+  super.initState();
+  futureQuizzes = futureQuizzesFn();
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: SafeArea(
-        //child: Text('game'),
-        child: FutureBuilder(
-          future: quizzesRef
-              .withConverter<Quiz>(
-                fromFirestore: (snapshots, _) =>
-                    Quiz.fromFirestore(snapshots.data()!),
-                toFirestore: (quiz, _) => quiz.toFirestore(),
-              )
-              .get(),
-          builder: (BuildContext context, snapshot) {
-            if (snapshot.hasError) {
-              return Center(child: Text("Something went wrong"));
+          child: FutureBuilder(
+        future: futureQuizzes,
+        builder: (BuildContext context, snapshot) {
+          if (snapshot.hasError) {
+            return Center(child: Text("Something went wrong"));
+          }
+
+          // if (snapshot.connectionState == ConnectionState.done) {
+
+          // }
+
+          if (snapshot.connectionState == ConnectionState.done) {
+            for (var doc in snapshot.data!.docs) {
+              var dd = doc.data();
+              quizzes.add(dd);
+              print('Quiz added ${dd.description}');
             }
-
-            // if (snapshot.connectionState == ConnectionState.done) {
-
-            // }
-
-            if (snapshot.connectionState == ConnectionState.done) {
-              for (var doc in snapshot.data!.docs) {
-                var dd = doc.data();
-                quizzes.add(dd);
-                print('Quiz added ${dd.description}');
-              }
-              print('${quizzes.length} quizzes overall');
-              //
+            print('${quizzes.length} quizzes overall');
+            //
+            if (quizzes.isEmpty) {
+              return Center(
+                child: Text('No quizzes yet! Go create one!'),
+              );
+            } else {
               return GridView.count(
                 crossAxisCount: 2,
                 children: [
@@ -55,10 +70,10 @@ class _CatalogScreenState extends State<CatalogScreen> {
                 ],
               );
             }
-            return Center(child: Text("Loading.."));
-          },
-        ),
-      ),
+          }
+          return Center(child: Text("Loading.."));
+        },
+      )),
       floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
       floatingActionButton: FloatingActionButton(
         child: Icon(Icons.menu),

@@ -74,23 +74,26 @@ class QuizWidget extends StatelessWidget {
         );
       },
       child: Card(
-        child: Column(
-          children: [
-            Text(quiz.description!),
-            SizedBox(
-              height: 115,
-              width: 115,
-              child: Center(
-                child: Text('Image Placeholder'),
+        child: Padding(
+          padding: const EdgeInsets.all(5.0),
+          child: Column(
+            children: [
+              Text(quiz.description!),
+              SizedBox(
+                height: 100,
+                width: 100,
+                child: Center(
+                  child: Text('Image Placeholder'),
+                ),
               ),
-            ),
-            Text(
-              (quiz.creator!),
-            ),
-            Text(
-              (DateFormat.yMMMd().format(quiz.date!)),
-            ),
-          ],
+              Text(
+                (quiz.creator!),
+              ),
+              Text(
+                (DateFormat.yMMMd().format(quiz.date!)),
+              ),
+            ],
+          ),
         ),
       ),
     );

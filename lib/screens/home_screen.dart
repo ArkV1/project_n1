@@ -1,44 +1,105 @@
-import 'package:flutter/material.dart';
+// ignore_for_file: prefer_const_constructors
 
-import '../buttons/menu_button.dart';
+import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_storage/firebase_storage.dart';
+
+import '../models/quiz.dart';
+import '../widgets/quiz_widget.dart';
 import './catalog_screen.dart';
 import './create_screen.dart';
 import './settings_screen.dart';
+import '../widgets/buttons/menu_button.dart';
 
-class HomeScreen extends StatelessWidget {
+final quizzesRef = FirebaseFirestore.instance.collection('quizzes');
+final storage = FirebaseStorage.instance;
+
+class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
-  //
-  void pageNavigation(BuildContext ctx, screen) {
-    Navigator.of(ctx).push(
+  @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  void pageNavigation(BuildContext ctx, screen) async {
+    await Navigator.of(ctx).push(
       MaterialPageRoute(
         builder: (_) {
           return screen;
         },
       ),
-    );
+    ).then((value) {
+      setState(() {});
+    });
   }
 
-  //
   @override
   Widget build(BuildContext context) {
+    List<Quiz> quizzes = [];
     return Scaffold(
       body: Center(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             Spacer(flex: 1),
-            Text('Quizzes and Tests'),
-            Spacer(flex: 1),
+            Text('Quizzes and Tests', textScaleFactor: 1.75),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Spacer(flex: 1),
+                Expanded(
+                  flex: 6,
+                  child: Padding(
+                    padding: const EdgeInsets.all(6.0),
+                    child: FutureBuilder(
+                      future: quizzesRef
+                          .withConverter<Quiz>(
+                            fromFirestore: (snapshots, _) =>
+                                Quiz.fromFirestore(snapshots.data()!),
+                            toFirestore: (quiz, _) => quiz.toFirestore(),
+                          )
+                          .get(const GetOptions(source: Source.cache)),
+                      builder: (BuildContext context, snapshot) {
+                        if (snapshot.hasError) {
+                          return Center(child: Text("Something went wrong"));
+                        }
+                        // if (snapshot.connectionState == ConnectionState.done) {
+                        // }
+                        if (snapshot.connectionState == ConnectionState.done) {
+                          for (var doc in snapshot.data!.docs) {
+                            var dd = doc.data();
+                            quizzes.add(dd);
+                            print('Quiz added ${dd.description}');
+                          }
+                          print('${quizzes.length} quizzes overall');
+                          return Container(
+                            child: quizzes.isNotEmpty
+                                ? QuizWidget(
+                                    quiz: (quizzes.toList()..shuffle()).first)
+                                : null,
+                          );
+                        }
+                        return Center(child: Text("Loading.."));
+                      },
+                    ),
+                  ),
+                ),
+                Spacer(flex: 1),
+              ],
+            ),
             IntrinsicWidth(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: <Widget>[
                   MenuButton(
                     'Catalog',
+                    //() {},
                     () => pageNavigation(context, CatalogScreen()),
                   ),
+
                   MenuButton('Saved', () {}),
+                  
                   MenuButton(
                     'Create',
                     () => pageNavigation(context, CreateScreen()),
