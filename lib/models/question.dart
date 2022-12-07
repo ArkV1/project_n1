@@ -13,9 +13,9 @@ class Question {
     Map<String, dynamic> data,
   ) {
     return Question(
-      questionText: data?['questionText'],
+      questionText: data['questionText'],
       answers: List<Answer>.from(
-          data?['answers'].map((x) => Answer.fromFirestore(x))),
+          data['answers'].map((x) => Answer.fromFirestore(x))),
     );
   }
 

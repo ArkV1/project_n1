@@ -5,7 +5,7 @@ import 'package:image_picker/image_picker.dart';
 
 class CreateScreenImagePicker extends StatefulWidget {
   CreateScreenImagePicker(this.imagePickFn);
-  
+
   final Function(File pickedImage) imagePickFn;
 
   @override
@@ -19,7 +19,11 @@ class _CreateScreenImagePickerState extends State<CreateScreenImagePicker> {
   void _pickImage() async {
     final picker = ImagePicker();
     //final pickedImageFile = await picker.pickImage(source: ImageSource.gallery);
-    final pickedImageFile = await picker.pickImage(source: ImageSource.camera);
+    final pickedImageFile = await picker.pickImage(
+      source: ImageSource.camera,
+      imageQuality: 50,
+      maxWidth: 200,
+    );
     setState(() {
       _pickedImage = File(pickedImageFile!.path);
     });

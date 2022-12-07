@@ -69,6 +69,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         if (snapshot.connectionState == ConnectionState.done) {
                           for (var doc in snapshot.data!.docs) {
                             var dd = doc.data();
+                            dd.id = doc.id;
                             quizzes.add(dd);
                             print('Quiz added ${dd.description}');
                           }
@@ -76,7 +77,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           return Container(
                             child: quizzes.isNotEmpty
                                 ? QuizWidget(
-                                    quiz: (quizzes.toList()..shuffle()).first)
+                                    quiz: (quizzes.toList()..shuffle()).first,)
                                 : null,
                           );
                         }

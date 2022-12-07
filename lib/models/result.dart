@@ -11,8 +11,8 @@ class Result {
     Map<String, dynamic> data,
   ) {
     return Result(
-      result: data?['result'],
-      score: data?['score'],
+      result: data['result'],
+      score: data['score'],
     );
   }
 
