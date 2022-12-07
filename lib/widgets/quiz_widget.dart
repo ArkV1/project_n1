@@ -1,9 +1,10 @@
 // ignore_for_file: prefer_const_constructors
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:project_n1/screens/home_screen.dart';
 
+import '/screens/home_screen.dart';
 import '/screens/quiz_screen.dart';
 import '../models/quiz.dart';
 
@@ -20,6 +21,19 @@ class QuizWidget extends StatelessWidget {
         },
       ),
     );
+  }
+
+  Future<String> getQuizPreviewImage() async {
+    var imagUrl;
+    try {
+      imagUrl =
+          await storage.ref('quiz_images/${quiz.id}.jpg').getDownloadURL();
+    } on FirebaseException catch (e) {
+      // Caught an exception from Firebase.
+      print("Failed with error '${e.code}': ${e.message}");
+      imagUrl = storage.ref('quiz_images/sample.jpg').getDownloadURL();
+    }
+    return imagUrl;
   }
 
   @override
@@ -76,7 +90,7 @@ class QuizWidget extends StatelessWidget {
           );
         },
         child: FutureBuilder(
-          future: storage.ref('quiz_images/${quiz.id}.jpg').getDownloadURL(),
+          future: getQuizPreviewImage(),
           builder: (context, snapshot) {
             switch (snapshot.connectionState) {
               case ConnectionState.waiting:
@@ -92,25 +106,26 @@ class QuizWidget extends StatelessWidget {
                               image: NetworkImage(snapshot.data!),
                               fit: BoxFit.fitHeight)),
                       child: Column(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Container(
-                            padding: EdgeInsets.all(1),
+                            padding: EdgeInsets.all(2),
                             width: double.infinity,
-                            color: Theme.of(context).dialogBackgroundColor.withOpacity(0.75),
+                            color: Theme.of(context)
+                                .dialogBackgroundColor
+                                .withOpacity(0.75),
                             child: Center(
                               child: Text(
                                 quiz.description!,
                               ),
                             ),
                           ),
-                          SizedBox(
-                            height: 100,
-                            width: 100,
-                          ),
                           Container(
-                            padding: EdgeInsets.all(1),
+                            padding: EdgeInsets.all(2),
                             width: double.infinity,
-                            color: Theme.of(context).dialogBackgroundColor.withOpacity(0.75),
+                            color: Theme.of(context)
+                                .dialogBackgroundColor
+                                .withOpacity(0.75),
                             child: Column(
                               children: [
                                 Center(

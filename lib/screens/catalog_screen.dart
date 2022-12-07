@@ -61,7 +61,9 @@ class _CatalogScreenState extends State<CatalogScreen> {
                       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                           crossAxisCount: 2),
                       itemBuilder: ((context, index) {
-                        return QuizWidget(quiz: quizzes[index].data()! as Quiz);
+                        final q = quizzes[index].data()! as Quiz;
+                        q.id = quizzes[index].id;
+                        return QuizWidget(quiz: q);
                       }),
                     );
                   }
