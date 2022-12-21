@@ -46,7 +46,7 @@ class _CreateScreenState extends State<CreateScreen> {
   }
 
   CollectionReference quizzes = FirebaseFirestore.instance
-      .collection('quizzes')
+      .collection('submitted-quizzes')
       .withConverter<Quiz>(
         fromFirestore: (snapshots, _) => Quiz.fromFirestore(snapshots.data()!),
         toFirestore: (quiz, _) => quiz.toFirestore(),
@@ -138,137 +138,166 @@ class _CreateScreenState extends State<CreateScreen> {
                     Column(
                       children: [
                         // Spacer(flex: 1),
-                        IntrinsicWidth(
-                          child: Form(
-                            key: _formKey,
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                CreateScreenImagePicker(_pickedImage),
-                                TextFormField(
-                                    decoration: InputDecoration(
-                                        labelText: 'Description'),
-                                    controller: descriptionController,
-                                    validator: validatorIsEmpty),
-                                TextField(
-                                  decoration: InputDecoration(
-                                    floatingLabelBehavior:
-                                        FloatingLabelBehavior.always,
-                                    labelText: 'Author',
-                                    hintText: 'Anonymous - Not logged in',
-                                  ),
-                                  enabled: false,
-                                  controller: null,
-                                  onSubmitted: null,
+                        Form(
+                          key: _formKey,
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              CreateScreenImagePicker(_pickedImage),
+                              IntrinsicWidth(
+                                child: Column(
+                                  children: [
+                                    TextFormField(
+                                        decoration: InputDecoration(
+                                            labelText: 'Description'),
+                                        controller: descriptionController,
+                                        validator: validatorIsEmpty),
+                                    TextField(
+                                      decoration: InputDecoration(
+                                        floatingLabelBehavior:
+                                            FloatingLabelBehavior.always,
+                                        labelText: 'Author',
+                                        hintText: 'Anonymous - Not logged in',
+                                      ),
+                                      enabled: false,
+                                      controller: null,
+                                      onSubmitted: null,
+                                    ),
+                                    TextField(
+                                      decoration: InputDecoration(
+                                        floatingLabelBehavior:
+                                            FloatingLabelBehavior.always,
+                                        labelText: 'Date',
+                                        hintText: (DateFormat.yMMMd()
+                                            .format(DateTime.now())
+                                            .toString()),
+                                      ),
+                                      enabled: false,
+                                      controller: null,
+                                      onSubmitted: null,
+                                    ),
+                                  ],
                                 ),
-                                TextField(
-                                  decoration: InputDecoration(
-                                    floatingLabelBehavior:
-                                        FloatingLabelBehavior.always,
-                                    labelText: 'Date',
-                                    hintText: (DateFormat.yMMMd()
-                                        .format(DateTime.now())
-                                        .toString()),
-                                  ),
-                                  enabled: false,
-                                  controller: null,
-                                  onSubmitted: null,
+                              ),
+                              if (typeQuiz == true) ...[
+                                Text('Type: Quiz'),
+                              ] else ...[
+                                Text('Type: Test'),
+                              ],
+                              Padding(
+                                padding: const EdgeInsets.only(top: 8.0),
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    //
+                                    Container(
+                                      padding: EdgeInsets.all(5),
+                                      child: ElevatedButton(
+                                        onPressed: () {
+                                          setState(() {
+                                            typeQuiz = true;
+                                          });
+                                        },
+                                        child: Text('Quiz'),
+                                      ),
+                                    ),
+                                    //
+                                    Container(
+                                      padding: EdgeInsets.all(5),
+                                      child: ElevatedButton(
+                                        onPressed: () {
+                                          setState(() {
+                                            typeQuiz = false;
+                                          });
+                                        },
+                                        child: Text('Test'),
+                                      ),
+                                    ),
+                                    //
+                                  ],
                                 ),
-                                if (typeQuiz == true) ...[
-                                  Text('Type: Quiz'),
-                                ] else ...[
-                                  Text('Type: Test'),
-                                ],
-                                Padding(
-                                  padding: const EdgeInsets.only(top: 8.0),
-                                  child: Row(
-                                    mainAxisAlignment: MainAxisAlignment.center,
+                              ),
+                              IntrinsicWidth(
+                                child: Container(
+                                  padding: EdgeInsets.all(10),
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.stretch,
                                     children: [
-                                      //
-                                      Container(
-                                        padding: EdgeInsets.all(5),
-                                        child: ElevatedButton(
-                                          onPressed: () {
-                                            setState(() {
-                                              typeQuiz = true;
-                                            });
-                                          },
-                                          child: Text('Quiz'),
-                                        ),
+                                      ElevatedButton(
+                                        child: Text('Add questions'),
+                                        onPressed: () {
+                                          if (_formKey.currentState!
+                                              .validate()) {
+                                            showDialog(
+                                              context: context,
+                                              builder: (BuildContext context) {
+                                                return AddQuestions(
+                                                    this.questions,
+                                                    callbackQuestions);
+                                              },
+                                            );
+                                          }
+                                        },
                                       ),
-                                      //
-                                      Container(
-                                        padding: EdgeInsets.all(5),
-                                        child: ElevatedButton(
-                                          onPressed: () {
-                                            setState(() {
-                                              typeQuiz = false;
-                                            });
-                                          },
-                                          child: Text('Test'),
-                                        ),
+                                      ElevatedButton(
+                                        child: Text('Add results'),
+                                        onPressed: () {
+                                          if (_formKey.currentState!
+                                              .validate()) {
+                                            showDialog(
+                                              context: context,
+                                              builder: (BuildContext context) {
+                                                return AddResults(this.results,
+                                                    callbackResults);
+                                              },
+                                            );
+                                          }
+                                        },
                                       ),
-                                      //
                                     ],
                                   ),
                                 ),
-                                IntrinsicWidth(
-                                  child: Container(
-                                    padding: EdgeInsets.all(10),
-                                    child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.stretch,
-                                      children: [
-                                        ElevatedButton(
-                                          child: Text('Add questions'),
-                                          onPressed: () {
-                                            if (_formKey.currentState!
-                                                .validate()) {
-                                              showDialog(
-                                                context: context,
-                                                builder:
-                                                    (BuildContext context) {
-                                                  return AddQuestions(
-                                                      this.questions,
-                                                      callbackQuestions);
-                                                },
-                                              );
-                                            }
-                                          },
-                                        ),
-                                        ElevatedButton(
-                                          child: Text('Add results'),
-                                          onPressed: () {
-                                            if (_formKey.currentState!
-                                                .validate()) {
-                                              showDialog(
-                                                context: context,
-                                                builder:
-                                                    (BuildContext context) {
-                                                  return AddResults(
-                                                      this.results,
-                                                      callbackResults);
-                                                },
-                                              );
-                                            }
-                                          },
-                                        ),
-                                      ],
-                                    ),
-                                  ),
+                              ),
+                              Padding(
+                                padding: EdgeInsets.symmetric(vertical: 2),
+                                child: SizedBox(
+                                  width:
+                                      MediaQuery.of(context).size.width * 0.7,
+                                  child: Text(
+                                      textAlign: TextAlign.center,
+                                      style: TextStyle(
+                                        color: Colors.red,
+                                      ),
+                                      'Your quiz/test will not be visible to other people in the catalog menu until it is approved by a moderator.'),
                                 ),
-                                ElevatedButton(
-                                  child: Text('Submit'),
-                                  style: ButtonStyle(
-                                      backgroundColor:
-                                          MaterialStateProperty.all<Color>(
-                                              Theme.of(context)
-                                                  .colorScheme
-                                                  .secondary)),
-                                  onPressed: _trySubmit,
-                                )
-                              ],
-                            ),
+                              ),
+                              ElevatedButton(
+                                child: Text('Submit'),
+                                style: ButtonStyle(
+                                  backgroundColor:
+                                      MaterialStateProperty.all(Colors.red),
+                                  // MaterialStateProperty.all<Color>(
+                                  //     Theme.of(context)
+                                  //         .colorScheme
+                                  //         .secondary),
+                                ),
+                                onPressed: _trySubmit,
+                              ),
+                              Padding(
+                                padding: EdgeInsets.symmetric(vertical: 2),
+                                child: SizedBox(
+                                  width:
+                                      MediaQuery.of(context).size.width * 0.7,
+                                  child: Text(
+                                      textAlign: TextAlign.center,
+                                      style: TextStyle(
+                                        color: Colors.red,
+                                      ),
+                                      'To submit items directly to the catalog, you need to log in.'),
+                                ),
+                              ),
+                            ],
                           ),
                         ),
                         // Spacer(flex: 1),
@@ -282,11 +311,11 @@ class _CreateScreenState extends State<CreateScreen> {
           ),
         ),
       ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
-      floatingActionButton: FloatingActionButton(
-        child: Icon(Icons.add),
-        onPressed: _trySubmit,
-      ),
+      // floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
+      // floatingActionButton: FloatingActionButton(
+      //   child: Icon(Icons.add),
+      //   onPressed: _trySubmit,
+      // ),
     );
   }
 }

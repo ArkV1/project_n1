@@ -44,6 +44,8 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
   ThemeMode? themeMode;
+  Color? primaryColor;
+  Color? primaryContrastingColor;
 
   Future<void> loadBundle() async {
     print('Loading Data Bundle');
@@ -57,6 +59,8 @@ class _MyAppState extends State<MyApp> {
   Future<void> _setThemeFromSharedPref() async {
     final prefs = await SharedPreferences.getInstance();
     final darkTheme = prefs.getBool('darkTheme');
+    final primaryColor = prefs.getString('primaryColor');
+    final primaryContrastingColor = prefs.getString('primaryContrastingColor');
     setState(() {
       if (darkTheme == null) {
         themeMode = ThemeMode.system;
@@ -64,6 +68,18 @@ class _MyAppState extends State<MyApp> {
         themeMode = ThemeMode.dark;
       } else {
         themeMode = ThemeMode.light;
+      }
+
+      switch (primaryColor) {
+        case null:
+          this.primaryColor = Colors.purple;
+          break;
+      }
+
+      switch (primaryContrastingColor) {
+        case null:
+          this.primaryContrastingColor = Colors.amber;
+          break;
       }
     });
   }
@@ -79,6 +95,34 @@ class _MyAppState extends State<MyApp> {
       await prefs.setBool('darkTheme', true);
     } else {
       await prefs.setBool('darkTheme', false);
+    }
+  }
+
+  void changeColor(Color? newColor, bool contrastingColor) async {
+    if (!contrastingColor) {
+      setState(() {
+        primaryColor = newColor;
+      });
+      final prefs = await SharedPreferences.getInstance();
+      // if (newColor == ThemeMode.system) {
+      //   await prefs.remove('darkTheme');
+      // } else if (newColor == ThemeMode.dark) {
+      //   await prefs.setBool('darkTheme', true);
+      // } else {
+      //   await prefs.setBool('darkTheme', false);
+      // }
+    } else {
+      setState(() {
+        primaryContrastingColor = newColor;
+      });
+      final prefs = await SharedPreferences.getInstance();
+      //   if (newColor == ThemeMode.system) {
+      //     await prefs.remove('darkTheme');
+      //   } else if (newColor == ThemeMode.dark) {
+      //     await prefs.setBool('darkTheme', true);
+      //   } else {
+      //     await prefs.setBool('darkTheme', false);
+      // }
     }
   }
 
@@ -99,8 +143,8 @@ class _MyAppState extends State<MyApp> {
             title: 'Quizzin',
             theme: CupertinoThemeData(
               brightness: Brightness.light,
-              primaryColor: Colors.purple,
-              primaryContrastingColor: Colors.amber,
+              primaryColor: primaryColor,
+              primaryContrastingColor: primaryContrastingColor,
             ),
             home: HomeScreen(),
           )
@@ -112,8 +156,8 @@ class _MyAppState extends State<MyApp> {
               brightness: Brightness.light,
               // LIGHT
               colorScheme: ColorScheme.light(
-                primary: Colors.purple,
-                secondary: Colors.amber,
+                primary: primaryColor!,
+                secondary: primaryContrastingColor!,
               ),
               fontFamily: 'Quicksand',
             ),
@@ -121,8 +165,8 @@ class _MyAppState extends State<MyApp> {
               brightness: Brightness.dark,
               // DARK
               colorScheme: ColorScheme.dark(
-                primary: Colors.purple,
-                secondary: Colors.amber,
+                primary: primaryColor!,
+                secondary: primaryContrastingColor!,
               ),
               fontFamily: 'Quicksand',
             ),

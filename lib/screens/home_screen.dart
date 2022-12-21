@@ -65,7 +65,8 @@ class _HomeScreenState extends State<HomeScreen> {
                           if (snapshot.hasError) {
                             return Center(child: Text("Something went wrong"));
                           }
-                          if (snapshot.connectionState == ConnectionState.done) {
+                          if (snapshot.connectionState ==
+                              ConnectionState.done) {
                             for (var doc in snapshot.data!.docs) {
                               var dd = doc.data();
                               dd.id = doc.id;
@@ -76,10 +77,12 @@ class _HomeScreenState extends State<HomeScreen> {
                             return Container(
                               child: quizzes.isNotEmpty
                                   ? AspectRatio(
-                                    aspectRatio: 16/9,
-                                    child: QuizWidget(
-                                        quiz: (quizzes.toList()..shuffle()).first,),
-                                  )
+                                      aspectRatio: 16 / 9,
+                                      child: QuizWidget(
+                                        quiz:
+                                            (quizzes.toList()..shuffle()).first,
+                                      ),
+                                    )
                                   : null,
                             );
                           }
@@ -99,9 +102,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       'Catalog',
                       () => pageNavigation(context, CatalogScreen()),
                     ),
-              
                     MenuButton('Saved', () {}),
-                    
                     MenuButton(
                       'Create',
                       () => pageNavigation(context, CreateScreen()),
